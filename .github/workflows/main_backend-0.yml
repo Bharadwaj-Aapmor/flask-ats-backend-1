@@ -9,40 +9,29 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read # Required for actions/checkout
 
     steps:
-      # 1. Checkout code
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 2. Set up Python
-      - name: Set up Python version
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # 3. Create virtual environment & install dependencies
-      - name: Install dependencies
-        run: |
+      - run: |
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. Zip everything including venv
-      - name: Create deployment package
-        run: |
-          zip -r app.zip . -x "*.git*" "__pycache__/*" "*.pytest_cache*" "*.github/*"
+      - run: |
+          zip -r app.zip . -x "*.git*" "__pycache__/*" "*.pytest_cache*" "*.github/*" "requirements.txt"
 
-      # 5. Deploy to Azure Web App
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+      - uses: azure/webapps-deploy@v3
         with:
-          app-name: 'backend-0' # Change to your App Service name
+          app-name: 'backend-0'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_1E44DD5F3D22408390A184658AAABEBC }}
           package: app.zip
+
 
 
